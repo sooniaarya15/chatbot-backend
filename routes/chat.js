@@ -1,16 +1,12 @@
 const router = require('express').Router();
+const auth = require('../middleware/auth');
 const asyncHandler = require('../utils/asyncHandler');
-const httpError = require('../utils/httpError');
-const { generateReply } = require('../services/ai');
+const c = require('../controllers/chatController');
 
-router.post(
-  '/ask',
-  asyncHandler(async (req, res) => {
-    const { message } = req.body;
-    if (!message || typeof message !== 'string') throw httpError(400, 'message is required');
-    const ai = await generateReply([{ role: 'user', content: message }]);
-    res.json({ reply: ai.content });
-  })
-);
+router.use(auth);
+router.get('/conversations', asyncHandler(c.list));
+router.get('/conversations/:id', asyncHandler(c.get));
+router.delete('/conversations/:id', asyncHandler(c.remove));
+router.post('/messages', asyncHandler(c.send));
 
 module.exports = router;
